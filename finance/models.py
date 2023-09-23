@@ -21,3 +21,18 @@ class Product(models.Model):
     admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='added_products')
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+
+class Client(models.Model):
+    name = models.CharField(max_length=255)
+    mobile = models.CharField(max_length=20)
+    advisor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='clients')
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    
+class Purchase(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='products')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='clients')
+    advisor = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='advisors')
+    
+    
