@@ -4,6 +4,7 @@ from .models import Product, Client, User, Purchase
 import json
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 from rest_framework import status
 import random, string
 
@@ -19,9 +20,12 @@ class SignUpView(APIView):
         mobile = data.get('mobile', None)
         otp = data.get('otp', None)
         role = data.get('role', None)
+        token, created = Token.objects.get_or_create(user=user)
         if mobile and otp and role:
             if role in ['User', 'Advisor']:
-                return JsonResponse({'message': f'{role} account created successfully.'}, status=status.HTTP_201_CREATED)
+                user = User.objects.create(mobile=mobile, role=role)
+                token, created = Token.objects.get_or_create(user=user)
+                return JsonResponse({'message': f'{role} account created successfully.', 'token': token.key}, status=status.HTTP_201_CREATED)
             else:
                 return JsonResponse({'error': 'Invalid role specified.'}, status=status.HTTP_400_BAD_REQUEST)
 
