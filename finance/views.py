@@ -10,19 +10,19 @@ import random, string
 
 # Create your views here.
 
-characters = string.ascii_letters + string.digits  
-otp = ''.join(random.choice(characters) for _ in range(6))
 
 
 class SignUpView(APIView):
     def post(self, request):
-        data = json.load(request.body)
+        data = json.loads(request.body)
         mobile = data.get('mobile', None)
-        otp = data.get('otp', None)
+        
+        characters = string.ascii_letters + string.digits  
+        otp = ''.join(random.choice(characters) for _ in range(6))
+
         role = data.get('role', None)
-        token, created = Token.objects.get_or_create(user=user)
         if mobile and otp and role:
-            if role in ['User', 'Advisor']:
+            if role in ['User', 'Advisor', 'Admin']:
                 user = User.objects.create(mobile=mobile, role=role)
                 token, created = Token.objects.get_or_create(user=user)
                 return JsonResponse({'message': f'{role} account created successfully.', 'token': token.key}, status=status.HTTP_201_CREATED)
@@ -35,7 +35,7 @@ class SignUpView(APIView):
     
 class AddClient(APIView):
     def post(self, request):
-        data = json.load(request.body)
+        data = json.loads(request.body)
         name = data.get('name')
         mobile = data.get('mobile')
 
@@ -62,7 +62,7 @@ class AdvisorClientsList(APIView):
 class AddProduct(APIView):
     
     def post(self, request):
-        data = json.loads(request.body)
+        data = json.loadss(request.body)
         name = data.get('name')
         description = data.get('description')
         category_name = data.get('category')
