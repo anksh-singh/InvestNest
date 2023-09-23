@@ -28,3 +28,31 @@ class SignUpView(APIView):
         return JsonResponse({'error': 'Mobile number, OTP, and role are required.'}, status=status.HTTP_400_BAD_REQUEST)
     
     
+    
+class AddClient(APIView):
+    def post(self, request):
+        data = json.load(request.body)
+        name = data.get('name')
+        mobile = data.get('mobile')
+
+        if name and mobile:
+            advisor = request.user 
+            client = Client.objects.create(name=name, mobile=mobile, advisor=advisor)
+
+            return JsonResponse({'message': 'Client added successfully.', 'client_id': client.id}, status=status.HTTP_201_CREATED)
+
+        return JsonResponse({'error': 'Name and mobile number are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+
+class AdvisorClientsList(APIView):
+    
+    def get(self, request):
+        advisor_id = request.GET.get('advisor_id')
+        clients = Client.objects.filter(advisor=advisor_id)
+        client_list = [{'client_id': client.id, 'name': client.name, 'mobile': client.mobile} for client in clients]
+        return JsonResponse({'clients': client_list}, status=status.HTTP_200_OK)
+    
+    
+    
+    
