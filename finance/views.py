@@ -55,4 +55,50 @@ class AdvisorClientsList(APIView):
     
     
     
+class AddProduct(APIView):
     
+    def post(self, request):
+        data = json.loads(request.body)
+        name = data.get('name')
+        description = data.get('description')
+        category_name = data.get('category')
+        admin_id = data.get('admin_id')
+        
+        if name and description and category_name and admin_id:
+        
+            try:
+                admin = User.objects.filter(id=admin_id, role='Admin').first()
+            except User.DoesNotExist:
+                    return JsonResponse({'error': 'Admin not found.'}, status=status.HTTP_404_NOT_FOUND)
+                
+            product = Product.objects.create(name=name, description=description, category=category_name, admin=admin)
+            
+            return JsonResponse({"message" : "Product added successfully!"}, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'error': 'Name, description, category, and admin_id all fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+class AdvisorPurchaseProduct(APIView):
+    def post(self, request):
+        advisor_id = request.POST.get('advisor_id')
+        client_id = request.POST.get('client_id')
+        product_id = request.POST.get('product_id')
+
+        if advisor_id and client_id and product_id:
+            try:
+                advisor = User.objects.get(id=advisor_id, role='Advisor')
+                client = Client.objects.get(id=client_id, advisor=advisor)
+                product = Product.objects.get(id=product_id)
+            except Exception as e:
+                return JsonResponse({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+            
+            purchase = Purchase.objects.create(advisor=advisor, client=client, product=product)
+
+
+            product_link = f'https://example.com/product/{purchase.id}/'  
+
+            return JsonResponse({'message': 'Product purchased successfully.', 'product_link': product_link}, status=status.HTTP_201_CREATED)
+
+        return JsonResponse({'error': 'advisor_id, client_id, and product_id are required.'}, status=status.HTTP_400_BAD_REQUEST)
